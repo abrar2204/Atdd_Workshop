@@ -3,15 +3,7 @@
 ### Requirements
 
 - Java 21
-- Any IDE that supports Java. I use VS Code with the following plugins.
-  - Debugger for Java
-  - Extension pack for Java
-  - Gradle for java
-  - Language support for Java by Red Hat
-  - Maven for Java
-  - Project Manager for Java
-  - Spring Initializr Java Support
-  - Test Runner for Java
+- Intellij CE or VS Code with appropriate plugins
 
 <details>
 <summary>Default Documentation from Project Manager</summary>
