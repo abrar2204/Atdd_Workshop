@@ -11,6 +11,8 @@ import com.tw.atdd_workshop.domains.Customer;
 import com.tw.atdd_workshop.models.customer.CreateCustomerRequest;
 import com.tw.atdd_workshop.services.CustomerService;
 
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RestController
 @RequestMapping("/customer")
 public class CustomerController {
@@ -22,7 +24,7 @@ public class CustomerController {
     }
 
 	@GetMapping("/{customerId}")
-	public Customer getCustomer(@PathVariable String customerId) {
+	public Customer getCustomer(@Parameter @PathVariable("customerId") String customerId) {
 		return customerService.getCustomer(customerId);
 	}
 
