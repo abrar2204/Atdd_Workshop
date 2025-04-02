@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 public class FeatureToggleService {
     
     public Boolean IsOn(String featureName){
-        return false;
+        return true;
     }
 }
