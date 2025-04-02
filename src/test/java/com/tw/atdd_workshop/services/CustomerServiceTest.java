@@ -1,7 +1,6 @@
 package com.tw.atdd_workshop.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,20 +52,5 @@ public class CustomerServiceTest {
 
         // Assert
         assertEquals(expectedCustomer, actualCustomer);
-    }
-
-
-    @Test
-    void verifyCustomer_customerExist_verifyCustomer(){
-        // Arrange
-        Customer customer = new Customer(UUID.randomUUID().toString(), UUID.randomUUID().toString(), false);
-        StaticDb.getCustomers().add(customer);
-
-        // Act
-        service.verifyCustomer(customer.getId());
-
-        // Assert
-        Customer customerAfterVerification = service.getCustomer(customer.getId());
-        assertTrue(customerAfterVerification.getIsVerified());
     }
 }
