@@ -37,7 +37,7 @@ public class CustomerServiceTest {
         Customer newCustomer = service.createCustomer(request);
 
         // Assert
-        List<Customer> customers = StaticDb.getCustomers().stream().filter(c -> c.getPhoneNumber() == phoneNumber).toList();
+        List<Customer> customers = StaticDb.getCustomers().stream().filter(c -> c.getPhoneNumber().equals(phoneNumber)).toList();
         assertEquals(1, customers.size());
         Customer actualCustomer = customers.get(0);
         assertEquals(request.phoneNumber(), actualCustomer.getPhoneNumber());
