@@ -1,7 +1,10 @@
 package com.tw.atdd_workshop.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,28 +12,34 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.tw.atdd_workshop.domains.Card;
 import com.tw.atdd_workshop.domains.CardType;
+import com.tw.atdd_workshop.domains.Customer;
 import com.tw.atdd_workshop.models.card.CreateCardRequest;
 import com.tw.atdd_workshop.persistence.StaticDb;
 
 public class CardServiceTest {
 
     private CardService service;
+    private CustomerService customerService;
 
     @BeforeEach
     public void init() {
         StaticDb.getCards().clear();
         StaticDb.getCustomers().clear();
-        service = new CardService();
+        customerService =  mock(CustomerService.class);
+        service = new CardService(customerService);
     }
 
     @Test
     void createCard_validRequest_createsNewCard(){
         // Arrange
         String customerId = UUID.randomUUID().toString();
+        Customer customer = new Customer(customerId, "1234567890", true);
         CreateCardRequest request = new CreateCardRequest(customerId, CardType.Visa);
+        when(customerService.getCustomer(customerId)).thenReturn(customer);
 
         // Act
         Card newCard = service.createCard(request);
@@ -41,6 +50,41 @@ public class CardServiceTest {
         Card actualCard = cards.get(0);
         assertEquals(request.cardType(), actualCard.getCardType());
         assertEquals(newCard.getId(), actualCard.getId());
+    }
+
+    @Test
+    void createCard_customerDoesNotExist_throwExceptionWithAppropriateMessage(){
+        // Arrange
+        CreateCardRequest request = new CreateCardRequest(UUID.randomUUID().toString(), CardType.Visa);
+
+        // Act
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+           () ->service.createCard(request),
+           "Expected createdCard() to throw Exception, but it didn't"
+        );
+
+        // Assert
+        assertTrue(exception.getMessage().contains("Customer Not Found"));
+    }
+
+    @Test
+    void createCard_customerIsNotVerified_throwExceptionWithAppropriateMessage(){
+        // Arrange
+        String customerId = UUID.randomUUID().toString();
+        Customer customer = new Customer(customerId, "1234567890", false);
+        CreateCardRequest request = new CreateCardRequest(customerId, CardType.Visa);
+        when(customerService.getCustomer(customerId)).thenReturn(customer);
+
+        // Act
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+           () ->service.createCard(request),
+           "Expected createdCard() to throw Exception, but it didn't"
+        );
+
+        // Assert
+        assertTrue(exception.getMessage().contains("Customer Not Verified"));
     }
 
     @Test
