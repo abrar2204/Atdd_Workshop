@@ -1,7 +1,6 @@
 package com.tw.atdd_workshop.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,10 +29,5 @@ public class CustomerController {
     @PostMapping("/")
 	public Customer createCustomer(@RequestBody CreateCustomerRequest request) {
 		return customerService.createCustomer(request);
-	}
-
-    @PatchMapping("/{customerId}")
-	public void createCustomer(@PathVariable String customerId) {
-		customerService.verifyCustomer(customerId);
 	}
 }
