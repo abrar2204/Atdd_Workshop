@@ -37,7 +37,7 @@ public class CardService {
             }
         }
 
-        Card existingCard = StaticDb.getCards().stream().filter(card -> card.getCustomerId() == request.customerId() && card.getCardType() == request.cardType()).findFirst().orElse(null);
+        Card existingCard = StaticDb.getCards().stream().filter(card -> card.getCustomerId().equals(request.customerId()) && card.getCardType().equals(request.cardType())).findFirst().orElse(null);
         if(existingCard != null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card Already Ordered");
         }
