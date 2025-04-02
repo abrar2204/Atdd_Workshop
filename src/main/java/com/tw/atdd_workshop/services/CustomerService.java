@@ -20,6 +20,6 @@ public class CustomerService {
     }
 
     public Customer getCustomer(String customerId){
-        return StaticDb.getCustomers().stream().filter(customer -> customer.getId() == customerId).findFirst().orElse(null);
+        return StaticDb.getCustomers().stream().filter(customer -> customer.getId().equals(customerId)).findFirst().orElse(null);
     }
 }
