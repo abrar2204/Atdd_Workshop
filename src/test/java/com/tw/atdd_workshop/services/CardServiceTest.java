@@ -112,6 +112,27 @@ public class CardServiceTest {
     }
 
     @Test
+    void createCard_cardAlreadyExistsForCustomer_throwsExceptionWithAppropriateMessage()
+    {
+        // Arrange
+        String customerId = UUID.randomUUID().toString();
+        when(featureToggleService.IsOn("check-customer-refactored")).thenReturn(true);
+        Card card1 = new Card(UUID.randomUUID().toString(), customerId, UUID.randomUUID().toString(), CardType.Visa);
+        StaticDb.getCards().add(card1);
+        CreateCardRequest request = new CreateCardRequest(customerId, CardType.Visa);
+
+        // Act
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+           () ->service.createCard(request),
+           "Expected createdCard() to throw Exception, but it didn't"
+        );
+
+        // Assert
+        assertTrue(exception.getMessage().contains("Card Already Ordered"));
+    }
+
+    @Test
     void getCustomerCards_cardsExist_getsAllCustomerCard(){
         // Arrange
         String customerId = UUID.randomUUID().toString();
