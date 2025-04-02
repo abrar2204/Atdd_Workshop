@@ -1,12 +1,15 @@
 package com.tw.atdd_workshop.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.tw.atdd_workshop.domains.Customer;
 import com.tw.atdd_workshop.models.customer.CreateCustomerRequest;
@@ -52,5 +55,38 @@ public class CustomerServiceTest {
 
         // Assert
         assertEquals(expectedCustomer, actualCustomer);
+    }
+
+    @Test
+    void checkCustomer_customerDoesNotExist_throwsException(){
+        // Arrange
+        String customerId = UUID.randomUUID().toString();
+
+        // Act
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+           () ->service.checkCustomer(customerId),
+           "Expected checkCustomer() to throw Exception, but it didn't"
+        );
+
+        // Assert
+        assertTrue(exception.getMessage().contains("Customer Not Found"));
+    }
+
+    @Test
+    void checkCustomer_customerIsNotVerified_throwsException(){
+        // Arrange
+        Customer expectedCustomer = new Customer(UUID.randomUUID().toString(), UUID.randomUUID().toString(), false);
+        StaticDb.getCustomers().add(expectedCustomer);
+
+        // Act
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+           () ->service.checkCustomer(expectedCustomer.getId()),
+           "Expected checkCustomer() to throw Exception, but it didn't"
+        );
+
+        // Assert
+        assertTrue(exception.getMessage().contains("Customer Not Verified"));
     }
 }

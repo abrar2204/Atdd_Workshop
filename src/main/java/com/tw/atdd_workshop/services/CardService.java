@@ -15,21 +15,26 @@ import com.tw.atdd_workshop.persistence.StaticDb;
 public class CardService {
 
     private final CustomerService customerService;
+    private final FeatureToggleService featureToggleService;
 
-    public CardService(CustomerService customerService) {
+    public CardService(CustomerService customerService, FeatureToggleService featureToggleService) {
         this.customerService = customerService;
+        this.featureToggleService = featureToggleService;
     }
 
     public Card createCard(CreateCardRequest request){
+        if(featureToggleService.IsOn("check-customer-refactored")){
+            customerService.checkCustomer(request.customerId());
+        }else{
+            Customer customer = customerService.getCustomer(request.customerId());
 
-        Customer customer = customerService.getCustomer(request.customerId());
+            if(customer == null){
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer Not Found");
+            }
 
-        if(customer == null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer Not Found");
-        }
-
-        if(!customer.getIsVerified()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer Not Verified");
+            if(!customer.getIsVerified()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer Not Verified");
+            }
         }
 
         Card card = new Card(UUID.randomUUID().toString(), request.customerId(), UUID.randomUUID().toString(), request.cardType());

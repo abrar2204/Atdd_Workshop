@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -24,13 +26,15 @@ public class CardServiceTest {
 
     private CardService service;
     private CustomerService customerService;
+    private FeatureToggleService featureToggleService;
 
     @BeforeEach
     public void init() {
         StaticDb.getCards().clear();
         StaticDb.getCustomers().clear();
         customerService =  mock(CustomerService.class);
-        service = new CardService(customerService);
+        featureToggleService = mock(FeatureToggleService.class);
+        service = new CardService(customerService, featureToggleService);
     }
 
     @Test
@@ -85,6 +89,26 @@ public class CardServiceTest {
 
         // Assert
         assertTrue(exception.getMessage().contains("Customer Not Verified"));
+    }
+
+    @Test
+    void createCard_checkCustomerRefactoredFeatureToggleIsOn_useNewImplementationFromCustomerServiceAndCreateCard()
+    {
+        // Arrange
+        String customerId = UUID.randomUUID().toString();
+        when(featureToggleService.IsOn("check-customer-refactored")).thenReturn(true);
+        CreateCardRequest request = new CreateCardRequest(customerId, CardType.Visa);
+
+        // Act
+        Card newCard = service.createCard(request);
+
+        // Assert
+        verify(customerService, times(1)).checkCustomer(customerId);
+        List<Card> cards = StaticDb.getCards().stream().filter(c -> c.getCustomerId() == customerId).toList();
+        assertEquals(1, cards.size());
+        Card actualCard = cards.get(0);
+        assertEquals(request.cardType(), actualCard.getCardType());
+        assertEquals(newCard.getId(), actualCard.getId());
     }
 
     @Test
