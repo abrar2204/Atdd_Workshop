@@ -12,7 +12,7 @@ import com.tw.atdd_workshop.persistence.StaticDb;
 public class CustomerService {
 
     public Customer createCustomer(CreateCustomerRequest request){
-        Customer customer = new Customer(UUID.randomUUID().toString(), request.phoneNumber(), false);
+        Customer customer = new Customer(UUID.randomUUID().toString(), request.phoneNumber(), true);
 
         StaticDb.getCustomers().add(customer);
 
