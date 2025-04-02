@@ -10,16 +10,19 @@ import org.springframework.web.server.ResponseStatusException;
 import com.tw.atdd_workshop.domains.*;
 import com.tw.atdd_workshop.models.card.CreateCardRequest;
 import com.tw.atdd_workshop.persistence.StaticDb;
+import com.tw.atdd_workshop.repositories.CardRepository;
 
 @Service
 public class CardService {
 
     private final CustomerService customerService;
     private final FeatureToggleService featureToggleService;
+    private final CardRepository cardRepository;
 
-    public CardService(CustomerService customerService, FeatureToggleService featureToggleService) {
+    public CardService(CustomerService customerService, FeatureToggleService featureToggleService, CardRepository cardRepository) {
         this.customerService = customerService;
         this.featureToggleService = featureToggleService;
+        this.cardRepository = cardRepository;
     }
 
     public Card createCard(CreateCardRequest request){
@@ -44,12 +47,20 @@ public class CardService {
  
         Card card = new Card(UUID.randomUUID().toString(), request.customerId(), UUID.randomUUID().toString(), request.cardType());
 
-        StaticDb.getCards().add(card);
+        if(featureToggleService.IsOn("card-repository-refactored")){
+            cardRepository.addCard(card);
+        }else{
+            StaticDb.getCards().add(card);
+        }
 
         return card;
     }
 
     public List<Card> getCustomerCards(String customerId){
-        return StaticDb.getCards().stream().filter(card -> card.getCustomerId() == customerId).toList();
+        if(featureToggleService.IsOn("card-repository-refactored")){
+            return cardRepository.getCustomerCards(customerId);
+        }else{
+            return StaticDb.getCards().stream().filter(card -> card.getCustomerId() == customerId).toList();
+        }
     }
 }

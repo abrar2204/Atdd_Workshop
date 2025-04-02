@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.tw.atdd_workshop.domains.Card;
@@ -21,12 +22,14 @@ import com.tw.atdd_workshop.domains.CardType;
 import com.tw.atdd_workshop.domains.Customer;
 import com.tw.atdd_workshop.models.card.CreateCardRequest;
 import com.tw.atdd_workshop.persistence.StaticDb;
+import com.tw.atdd_workshop.repositories.CardRepository;
 
 public class CardServiceTest {
 
     private CardService service;
     private CustomerService customerService;
     private FeatureToggleService featureToggleService;
+    private CardRepository cardRepository;
 
     @BeforeEach
     public void init() {
@@ -34,7 +37,8 @@ public class CardServiceTest {
         StaticDb.getCustomers().clear();
         customerService =  mock(CustomerService.class);
         featureToggleService = mock(FeatureToggleService.class);
-        service = new CardService(customerService, featureToggleService);
+        cardRepository = mock(CardRepository.class);
+        service = new CardService(customerService, featureToggleService, cardRepository);
     }
 
     @Test
@@ -133,6 +137,27 @@ public class CardServiceTest {
     }
 
     @Test
+    void createCard_cardRepositoryRefactoredFeatureToggleIsOn_useNewImplementationFromCardRepositoryToCreateCard()
+    {
+        // Arrange
+        String customerId = UUID.randomUUID().toString();
+        when(featureToggleService.IsOn("check-customer-refactored")).thenReturn(true);
+        when(featureToggleService.IsOn("card-repository-refactored")).thenReturn(true);
+        CreateCardRequest request = new CreateCardRequest(customerId, CardType.Visa);
+        ArgumentCaptor<Card> cardArgument = ArgumentCaptor.forClass(Card.class);
+
+        // Act
+        Card newCard = service.createCard(request);
+
+        // Assert
+        verify(customerService, times(1)).checkCustomer(customerId);
+        verify(cardRepository, times(1)).addCard(cardArgument.capture());
+        Card actualCard = cardArgument.getValue();
+        assertEquals(request.cardType(), actualCard.getCardType());
+        assertEquals(newCard.getId(), actualCard.getId());
+    }
+
+    @Test
     void getCustomerCards_cardsExist_getsAllCustomerCard(){
         // Arrange
         String customerId = UUID.randomUUID().toString();
@@ -150,5 +175,24 @@ public class CardServiceTest {
         assertEquals(3, cards.size());
         assertTrue(cards.stream().allMatch(card -> card.getId() == card1.getId() || card.getId() == card2.getId() || card.getId() == card3.getId())); 
         assertTrue(cards.stream().noneMatch(card -> card.getId() == card4.getId() || card.getId() == card5.getId())); 
+    }
+
+    @Test
+    void getCustomerCards_cardRepositoryRefactoredFeatureToggleIsOn_useNewImplementationFromCardRepositoryToGetCustomerCards(){
+        // Arrange
+        String customerId = UUID.randomUUID().toString();
+        Card card1 = new Card(UUID.randomUUID().toString(), customerId, UUID.randomUUID().toString(), CardType.Visa);
+        Card card2 = new Card(UUID.randomUUID().toString(), customerId, UUID.randomUUID().toString(), CardType.MasterCard);
+        Card card3 = new Card(UUID.randomUUID().toString(), customerId, UUID.randomUUID().toString(), CardType.RuPay);
+        when(featureToggleService.IsOn("card-repository-refactored")).thenReturn(true);
+        when(cardRepository.getCustomerCards(customerId)).thenReturn(Arrays.asList(card1, card2, card3));
+
+        // Act
+        List<Card> cards = service.getCustomerCards(customerId);
+
+        // Assert
+        verify(cardRepository, times(1)).getCustomerCards(customerId);
+        assertEquals(3, cards.size());
+        assertTrue(cards.stream().allMatch(card -> card.getId() == card1.getId() || card.getId() == card2.getId() || card.getId() == card3.getId())); 
     }
 }
