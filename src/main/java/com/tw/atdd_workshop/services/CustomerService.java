@@ -22,9 +22,4 @@ public class CustomerService {
     public Customer getCustomer(String customerId){
         return StaticDb.getCustomers().stream().filter(customer -> customer.getId() == customerId).findFirst().orElse(null);
     }
-
-    public void verifyCustomer(String customerId){
-        Customer customer = StaticDb.getCustomers().stream().filter(c -> c.getId() == customerId).findFirst().orElse(null);
-        customer.setIsVerified(true);
-    }
 }
