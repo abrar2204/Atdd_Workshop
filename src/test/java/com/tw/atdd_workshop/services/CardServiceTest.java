@@ -104,7 +104,7 @@ public class CardServiceTest {
 
         // Assert
         verify(customerService, times(1)).checkCustomer(customerId);
-        List<Card> cards = StaticDb.getCards().stream().filter(c -> c.getCustomerId() == customerId).toList();
+        List<Card> cards = StaticDb.getCards().stream().filter(c -> c.getCustomerId().equals(customerId)).toList();
         assertEquals(1, cards.size());
         Card actualCard = cards.get(0);
         assertEquals(request.cardType(), actualCard.getCardType());
