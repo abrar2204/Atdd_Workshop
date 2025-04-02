@@ -193,6 +193,6 @@ public class CardServiceTest {
         // Assert
         verify(cardRepository, times(1)).getCustomerCards(customerId);
         assertEquals(3, cards.size());
-        assertTrue(cards.stream().allMatch(card -> card.getId() == card1.getId() || card.getId() == card2.getId() || card.getId() == card3.getId())); 
+        assertTrue(cards.stream().allMatch(card -> card.getId().equals(card1.getId()) || card.getId().equals(card2.getId()) || card.getId().equals(card3.getId()))); 
     }
 }
