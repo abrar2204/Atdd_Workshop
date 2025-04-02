@@ -13,6 +13,8 @@ import com.tw.atdd_workshop.domains.Card;
 import com.tw.atdd_workshop.models.card.CreateCardRequest;
 import com.tw.atdd_workshop.services.CardService;
 
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RestController
 @RequestMapping("/card")
 public class CardController {
@@ -24,7 +26,7 @@ public class CardController {
     }
 
 	@GetMapping("/{customerId}")
-	public List<Card> getCustomerCards(@PathVariable String customerId) {
+	public List<Card> getCustomerCards(@Parameter @PathVariable("customerId") String customerId) {
 		return cardService.getCustomerCards(customerId);
 	}
 

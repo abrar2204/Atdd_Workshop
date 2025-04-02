@@ -45,6 +45,6 @@ public class CardService {
     }
 
     public List<Card> getCustomerCards(String customerId){
-        return StaticDb.getCards().stream().filter(card -> card.getCustomerId() == customerId).toList();
+        return StaticDb.getCards().stream().filter(card -> card.getCustomerId().equals(customerId)).toList();
     }
 }

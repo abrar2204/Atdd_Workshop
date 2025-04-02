@@ -49,7 +49,7 @@ public class CardServiceTest {
         Card newCard = service.createCard(request);
 
         // Assert
-        List<Card> cards = StaticDb.getCards().stream().filter(c -> c.getCustomerId() == customerId).toList();
+        List<Card> cards = StaticDb.getCards().stream().filter(c -> c.getCustomerId().equals(customerId)).toList();
         assertEquals(1, cards.size());
         Card actualCard = cards.get(0);
         assertEquals(request.cardType(), actualCard.getCardType());
@@ -127,7 +127,7 @@ public class CardServiceTest {
 
         // Assert
         assertEquals(3, cards.size());
-        assertTrue(cards.stream().allMatch(card -> card.getId() == card1.getId() || card.getId() == card2.getId() || card.getId() == card3.getId())); 
-        assertTrue(cards.stream().noneMatch(card -> card.getId() == card4.getId() || card.getId() == card5.getId())); 
+        assertTrue(cards.stream().allMatch(card -> card.getId().equals(card1.getId()) || card.getId().equals(card2.getId()) || card.getId().equals(card3.getId()))); 
+        assertTrue(cards.stream().noneMatch(card -> card.getId().equals(card4.getId()) || card.getId().equals(card5.getId()))); 
     }
 }
